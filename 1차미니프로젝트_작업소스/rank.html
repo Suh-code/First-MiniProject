@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>암산왕 랭킹</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+        }
+
+        h1 {
+            font-size: 4em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        table {
+            width: 60%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 15px;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tbody tr:hover {
+            background-color: #ddd;
+        }
+
+        a {
+            display: block;
+            margin: 10px 0;
+            padding: 10px 20px;
+            text-decoration: none;
+            color: white;
+            background-color: #007BFF;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        a:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>랭킹</h1>
+    <table id="rank_table">
+        <thead>
+            <tr>
+                <th>랭킹</th>
+                <th>닉네임</th>
+                <th>스코어</th>
+            </tr>
+        </thead>
+        <tbody id="rank_body">
+        </tbody>
+    </table>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script type="text/javascript">
+        $.ajax({
+            url: "/king/rank",
+            success: function(data) {
+                let s = "";
+                for(let i = 0; i < data.length; i++) {
+                    s += "<tr>";
+                    s += "<td>" + (i + 1) + "</td>";
+                    s += "<td>" + data[i].nickname + "</td>";
+                    s += "<td>" + data[i].count + "</td>";
+                    s += "</tr>";
+                }
+                $("#rank_body").html(s);
+            }
+        });
+    </script>
+    <div><a href="game.html">암산왕 도전</a></div>
+    <div><a href="king.html">메인으로</a></div>
+</body>
+</html>

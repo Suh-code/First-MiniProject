@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>암산왕</title>
+        <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+        }
+
+        h1 {
+            font-size: 4em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        p {
+            font-size: 1.5em;
+            margin: 10px 0;
+        }
+
+        input {
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 1em;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #nickname-section {
+            display: none;
+            margin-top: 20px;
+        }
+
+        a {
+            display: block;
+            margin: 10px 0;
+            padding: 10px 20px;
+            text-decoration: none;
+            color: white;
+            background-color: #007BFF;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        a:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+        	
+            // 초기 count 값 설정
+            //var count = 0;
+            //$("count").text(count);
+        	var timer;
+        	var timeLeft = 30; // 타이머 초기 시간 (100초)
+        	
+        	//타이머 함수
+        	function startTimer() {
+        		timer = setInterval(function(){
+        			timeLeft--;
+        			$("#timer").text(timeLeft);
+        			if (timeLeft<=0){
+        				clearInterval(timer);
+        				$('#submit').prop("disalbed",true);
+        				$("#nickname-section").show();
+        			}
+        		},1000);
+        	}
+        	
+        	
+            // 새로운 게임 숫자를 불러오는 함수
+            function loadGame() {
+                $.ajax({
+                    url: "/king/game",
+                    type: "GET",
+                    success: function(data) {
+                        $("#num1").text(data.com_num1);
+                        $("#num2").text(data.com_num2);
+                    }
+                });
+            }
+
+            // 게임 숫자 초기 불러오기
+            loadGame();
+            startTimer();
+
+            // 답안 제출
+            $("#submit").click(function() {
+                var answer = $("#answer").val();
+                var num1 = $("#num1").text();
+                var num2 = $("#num2").text();
+                var count = $("#count").text();
+
+                $.ajax({
+                    url: "/king/game/check",
+                    type: "GET",
+                    data: {
+                        answer: answer,
+                        num1: num1,
+                        num2: num2,
+                        count : count
+                    },
+                    success: function(data) {
+                        if (data.code === "ok") {
+                            alert(data.message);
+                            // 새로운 숫자 업데이트
+                            $("#num1").text(data.com_num1);
+                            $("#num2").text(data.com_num2);
+                            // count 값 업데이트
+                            $("#count").text(data.count);
+                        } else {
+                            alert(data.message);
+                        }
+                    }
+                });
+
+                // 답안 입력값 초기화
+                $("#answer").val("");
+            });
+            
+            
+            // 닉네임 입력
+            $("#submit-nickname").click(function(){
+            	var nickname = $('#nickname').val();
+            	var count = $("#count").text();
+            	if (nickname.trim() ===""){
+            		alert("닉네임을 입력하세요.");
+            		return;
+            	}
+            
+            	$.ajax({
+            		url: "/king/save",
+            		type : "POST",
+            		data : {
+            			nickname : nickname,
+            			count : count
+            		},
+            		success: function(data){
+            			if(data.code==="ok"){
+            				alert("닉네임과 점수가 저장되었습니다.")
+            				$("#nickname-section").hide();
+            				$("#nickname").val("");
+            				count=0;
+            				$("#count").text(count);
+            				timeLeft =100;
+            				$("#submit").prop("disabled",false);
+            				loadGame();
+            				startTimer();
+            			}else{
+            				alert(data.message);
+            			}
+            		}
+            	});
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>암산왕</h1>
+    <p>타이머 : <span id="timer">100</span>초</p>
+    <p>문제 : <span id="num1"></span> + <span id="num2"></span></p>
+    <input type="number" id="answer" placeholder="정답">
+    <button id="submit">제출</button>
+    <p>스코어 : <span id="count">0</span></p>
+    
+    <div id="nickname-section" style="display:none;">
+    	<h2>게임 종료</h2>
+    	<p>닉네임을 입력하세요 : </p>
+    	<input type="text" id="nickname" placeholder="닉네임">
+    	<button id="submit-nickname">등록</button>
+    </div>
+    
+    <div><a href="rank.html">랭킹보기</a></div>
+    <div><a href="king.html">메인으로</a></div>
+</body>
+</html>
